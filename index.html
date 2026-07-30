@@ -14,6 +14,7 @@
 <h1 class="text-2xl font-bold text-slate-900">InterRail - Despesas</h1>
 <p class="text-sm text-slate-500">Contabilidade rigorosa para evitar dramas.</p>
 </div>
+<div class="flex items-center gap-4">
 <div class="flex gap-4 text-center">
 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
 <span class="block text-xs text-slate-400 uppercase font-semibold">Total Gasto</span>
@@ -24,7 +25,19 @@
 <span id="perPerson" class="text-lg font-bold text-indigo-600">0.00 €</span>
 </div>
 </div>
+</div>
 </header>
+
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+<div class="text-sm text-slate-600 font-medium">Sincronização entre Dispositivos:</div>
+<div class="flex gap-3">
+<button onclick="exportData()" class="bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-xl text-sm font-semibold transition duration-200">Exportar Backup</button>
+<label class="bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-xl text-sm font-semibold transition duration-200 cursor-pointer">
+Importar Backup
+<input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+</label>
+</div>
+</div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-1 h-fit">
@@ -131,6 +144,38 @@ saveData();
 renderApp();
 }
 
+function exportData() {
+const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(expenses));
+const downloadAnchor = document.createElement('a');
+downloadAnchor.setAttribute("href", dataStr);
+downloadAnchor.setAttribute("download", "interrail_backup.json");
+document.body.appendChild(downloadAnchor);
+downloadAnchor.click();
+downloadAnchor.remove();
+}
+
+function importData(event) {
+const fileReader = new FileReader();
+if (event.target.files[0]) {
+fileReader.readAsText(event.target.files[0], "UTF-8");
+fileReader.onload = (e) => {
+try {
+const importedExpenses = JSON.parse(e.target.result);
+if (Array.isArray(importedExpenses)) {
+expenses = importedExpenses;
+saveData();
+renderApp();
+alert("Dados importados com sucesso!");
+} else {
+alert("Formato de ficheiro inválido.");
+}
+} catch (error) {
+alert("Erro ao ler o ficheiro.");
+}
+};
+}
+}
+
 function updateChart() {
 const categories = {};
 expenses.forEach(exp => {
@@ -172,7 +217,7 @@ expenseForm.addEventListener('submit', (e) => {
 e.preventDefault();
 const newExpense = {
 date: document.getElementById('expenseDate').value,
-day: document.getElementById('expenseDay').value,
+day: document.getElementById('expenseDay',).value,
 type: document.getElementById('expenseType').value.trim(),
 description: document.getElementById('expenseDescription').value,
 total: parseFloat(document.getElementById('expenseTotal').value)
