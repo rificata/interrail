@@ -81,10 +81,10 @@ Importar Backup
 <table class="w-full text-left text-sm">
 <thead class="bg-slate-50 border-b border-slate-200 text-slate-400 uppercase text-xs">
 <tr>
-<th class="p-3">Data / Dia</th>
-<th class="p-3">Tipo</th>
-<th class="p-3">Descrição</th>
-<th class="p-3">Total</th>
+<th class="p-3 cursor-pointer hover:text-slate-600 select-none" onclick="sortTable('date')">Data / Dia ↕</th>
+<th class="p-3 cursor-pointer hover:text-slate-600 select-none" onclick="sortTable('type')">Tipo ↕</th>
+<th class="p-3 cursor-pointer hover:text-slate-600 select-none" onclick="sortTable('description')">Descrição ↕</th>
+<th class="p-3 cursor-pointer hover:text-slate-600 select-none" onclick="sortTable('total')">Total ↕</th>
 <th class="p-3">Metade</th>
 <th class="p-3 text-right">Ações</th>
 </tr>
@@ -101,6 +101,8 @@ Importar Backup
 <script>
 let expenses = JSON.parse(localStorage.getItem('interrail_expenses')) || [];
 let expenseChartInstance = null;
+let currentSortColumn = 'date';
+let currentSortDirection = 'asc';
 
 const expenseForm = document.getElementById('expenseForm');
 const expenseTableBody = document.getElementById('expenseTableBody');
@@ -111,11 +113,39 @@ function saveData() {
 localStorage.setItem('interrail_expenses', JSON.stringify(expenses));
 }
 
+function sortTable(column) {
+if (currentSortColumn === column) {
+currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+} else {
+currentSortColumn = column;
+currentSortDirection = 'asc';
+}
+renderApp();
+}
+
 function renderApp() {
 expenseTableBody.innerHTML = '';
 let totalSum = 0;
 
-expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+expenses.sort((a, b) => {
+let valA = a[currentSortColumn];
+let valB = b[currentSortColumn];
+
+if (currentSortColumn === 'date') {
+valA = new Date(valA);
+valB = new Date(valB);
+} else if (currentSortColumn === 'day' || currentSortColumn === 'total') {
+valA = parseFloat(valA);
+valB = parseFloat(valB);
+} else if (typeof valA === 'string') {
+valA = valA.toLowerCase();
+valB = valB.toLowerCase();
+}
+
+if (valA < valB) return currentSortDirection === 'asc' ? -1 : 1;
+if (valA > valB) return currentSortDirection === 'asc' ? 1 : -1;
+return 0;
+});
 
 expenses.forEach((expense, index) => {
 totalSum += parseFloat(expense.total);
@@ -217,7 +247,7 @@ expenseForm.addEventListener('submit', (e) => {
 e.preventDefault();
 const newExpense = {
 date: document.getElementById('expenseDate').value,
-day: document.getElementById('expenseDay',).value,
+day: document.getElementById('expenseDay').value,
 type: document.getElementById('expenseType').value.trim(),
 description: document.getElementById('expenseDescription').value,
 total: parseFloat(document.getElementById('expenseTotal').value)
