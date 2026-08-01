@@ -3,336 +3,1070 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InterRail - Central Financeira</title>
+<title>InterRail // Centro de Comando</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f5f5f4; }
+  .tab-active { border-bottom: 2px solid #b45309; color: #b45309; }
+  .entry-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+  .entry-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.08); }
+  .modal-backdrop { background: rgba(28, 25, 23, 0.6); backdrop-filter: blur(4px); }
+  .kpi-card { background: linear-gradient(135deg, #ffffff 0%, #fafaf9 100%); }
+  .day-header { background: linear-gradient(90deg, #fffbeb 0%, #ffffff 100%); }
+  .cost-badge { font-variant-numeric: tabular-nums; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f5f5f4; }
+  ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; }
+  .info-pill { background: #f5f5f4; border: 1px solid #e7e5e4; border-radius: 0.5rem; padding: 0.45rem 0.65rem; }
+  .info-pill .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: #a8a29e; font-weight: 700; }
+  .info-pill .value { font-size: 13px; font-weight: 600; color: #1c1917; margin-top: 2px; line-height: 1.25; }
+</style>
 </head>
-<body class="bg-stone-100 text-stone-800 min-h-screen p-4 md:p-8">
-<div class="max-w-6xl mx-auto space-y-8">
-<header class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 flex flex-col md:flex-row justify-between items-center gap-4">
-<div>
-<h1 class="text-2xl font-bold text-stone-900 tracking-tight">InterRail // Central de Controlo</h1>
-<p class="text-sm text-stone-500">Gestão financeira impiedosa para evitar divórcios de amizade a meio da Europa.</p>
-</div>
-<div class="flex flex-wrap gap-3 text-center">
-<div class="bg-stone-50 p-3 rounded-xl border border-stone-200 min-w-[110px]">
-<span class="block text-[10px] text-stone-400 uppercase font-bold tracking-wider">Total Gasto</span>
-<span id="totalSpent" class="text-base font-bold text-stone-900">0.00 €</span>
-</div>
-<div class="bg-stone-50 p-3 rounded-xl border border-stone-200 min-w-[110px]">
-<span class="block text-[10px] text-stone-400 uppercase font-bold tracking-wider">Por Pessoa</span>
-<span id="perPerson" class="text-base font-bold text-amber-700">0.00 €</span>
-</div>
-<div class="bg-stone-50 p-3 rounded-xl border border-stone-200 min-w-[110px]">
-<span class="block text-[10px] text-stone-400 uppercase font-bold tracking-wider">Média / Dia</span>
-<span id="dailyAverage" class="text-base font-bold text-stone-900">0.00 €</span>
-</div>
-<div class="bg-stone-50 p-3 rounded-xl border border-stone-200 min-w-[110px]">
-<span class="block text-[10px] text-stone-400 uppercase font-bold tracking-wider">Pico Diário</span>
-<span id="peakDay" class="text-base font-bold text-stone-900">0.00 €</span>
-</div>
-</div>
+<body class="text-stone-800 min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-white/95 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-40 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-stone-900">
+        InterRail <span class="text-amber-700 font-bold">//</span> Centro de Comando
+      </h1>
+      <p class="text-xs text-stone-500 mt-0.5 font-medium">Gestão impiedosa de viagens, amizades e carteiras · v2.2</p>
+    </div>
+    <div class="flex flex-wrap gap-2 text-center">
+      <div class="bg-stone-50 border border-stone-200/80 rounded-xl px-3.5 py-2 min-w-[95px] shadow-sm">
+        <div class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Total</div>
+        <div id="hdrTotal" class="font-extrabold text-stone-900 text-sm cost-badge">0.00 €</div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200/60 rounded-xl px-3.5 py-2 min-w-[95px] shadow-sm">
+        <div class="text-[10px] uppercase tracking-wider text-amber-600/80 font-bold">Por Pessoa</div>
+        <div id="hdrPerPerson" class="font-extrabold text-amber-800 text-sm cost-badge">0.00 €</div>
+      </div>
+      <div class="bg-stone-50 border border-stone-200/80 rounded-xl px-3.5 py-2 min-w-[80px] shadow-sm">
+        <div class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Dias</div>
+        <div id="hdrDays" class="font-extrabold text-stone-900 text-sm">0</div>
+      </div>
+      <div class="bg-stone-50 border border-stone-200/80 rounded-xl px-3.5 py-2 min-w-[80px] shadow-sm">
+        <div class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Países</div>
+        <div id="hdrCountries" class="font-extrabold text-stone-900 text-sm">0</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1 overflow-x-auto">
+    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-4 py-3 text-sm font-semibold text-stone-500 hover:text-stone-800 whitespace-nowrap tab-active transition-colors">Dashboard</button>
+    <button onclick="switchTab('itinerary')" id="tab-itinerary" class="tab-btn px-4 py-3 text-sm font-semibold text-stone-500 hover:text-stone-800 whitespace-nowrap transition-colors">Itinerário</button>
+    <button onclick="switchTab('travelers')" id="tab-travelers" class="tab-btn px-4 py-3 text-sm font-semibold text-stone-500 hover:text-stone-800 whitespace-nowrap transition-colors">Viajantes</button>
+    <button onclick="switchTab('backup')" id="tab-backup" class="tab-btn px-4 py-3 text-sm font-semibold text-stone-500 hover:text-stone-800 whitespace-nowrap transition-colors">Backup</button>
+  </nav>
 </header>
 
-<div class="bg-white p-4 rounded-2xl shadow-sm border border-stone-200 flex flex-wrap justify-between items-center gap-4">
-<div class="text-sm text-stone-600 font-medium">Sincronização entre Dispositivos:</div>
-<div class="flex gap-3">
-<button onclick="exportData()" class="bg-stone-100 text-stone-700 hover:bg-stone-200 px-4 py-2 rounded-xl text-sm font-semibold transition duration-200">Exportar Backup</button>
-<label class="bg-stone-100 text-stone-700 hover:bg-stone-200 px-4 py-2 rounded-xl text-sm font-semibold transition duration-200 cursor-pointer">
-Importar Backup
-<input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
-</label>
-</div>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-7 space-y-7">
+
+  <!-- ==================== DASHBOARD ==================== -->
+  <section id="view-dashboard" class="space-y-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="kpi-card rounded-2xl border border-stone-200/80 p-5 shadow-sm">
+        <div class="text-[11px] uppercase tracking-wider text-stone-400 font-bold mb-1">Total Gasto</div>
+        <div id="kpiTotal" class="text-2xl font-extrabold text-stone-900 cost-badge tracking-tight">0.00 €</div>
+      </div>
+      <div class="kpi-card rounded-2xl border border-amber-200/50 p-5 shadow-sm bg-gradient-to-br from-amber-50/50 to-white">
+        <div class="text-[11px] uppercase tracking-wider text-amber-700/70 font-bold mb-1">Por Pessoa</div>
+        <div id="kpiPerPerson" class="text-2xl font-extrabold text-amber-800 cost-badge tracking-tight">0.00 €</div>
+      </div>
+      <div class="kpi-card rounded-2xl border border-stone-200/80 p-5 shadow-sm">
+        <div class="text-[11px] uppercase tracking-wider text-stone-400 font-bold mb-1">Média / Dia</div>
+        <div id="kpiDailyAvg" class="text-2xl font-extrabold text-stone-900 cost-badge tracking-tight">0.00 €</div>
+      </div>
+      <div class="kpi-card rounded-2xl border border-stone-200/80 p-5 shadow-sm">
+        <div class="text-[11px] uppercase tracking-wider text-stone-400 font-bold mb-1">Pico Diário</div>
+        <div id="kpiPeak" class="text-2xl font-extrabold text-stone-900 cost-badge tracking-tight">0.00 €</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-2xl border border-stone-200/80 p-4 text-center shadow-sm">
+        <div class="text-2xl font-extrabold text-stone-900" id="statNights">0</div>
+        <div class="text-xs text-stone-500 mt-1 font-medium">Noites</div>
+      </div>
+      <div class="bg-white rounded-2xl border border-stone-200/80 p-4 text-center shadow-sm">
+        <div class="text-2xl font-extrabold text-stone-900" id="statTransports">0</div>
+        <div class="text-xs text-stone-500 mt-1 font-medium">Transportes</div>
+      </div>
+      <div class="bg-white rounded-2xl border border-stone-200/80 p-4 text-center shadow-sm">
+        <div class="text-2xl font-extrabold text-stone-900" id="statMeals">0</div>
+        <div class="text-xs text-stone-500 mt-1 font-medium">Refeições</div>
+      </div>
+      <div class="bg-white rounded-2xl border border-stone-200/80 p-4 text-center shadow-sm">
+        <div class="text-2xl font-extrabold text-stone-900" id="statActivities">0</div>
+        <div class="text-xs text-stone-500 mt-1 font-medium">Atividades</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-4">Gastos por Categoria</h3>
+        <div class="h-64 relative"><canvas id="categoryChart"></canvas></div>
+      </div>
+      <div class="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-4">Evolução Diária</h3>
+        <div class="h-64 relative"><canvas id="dailyChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-sm">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500">Países Visitados</h3>
+          <span class="text-[10px] text-stone-400 font-medium">Preenchido automaticamente</span>
+        </div>
+        <div id="countriesList" class="flex flex-wrap gap-2 min-h-[40px]"></div>
+      </div>
+      <div class="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3">Últimas Entradas</h3>
+        <div id="recentEntries" class="space-y-2 text-sm max-h-52 overflow-y-auto"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ITINERÁRIO ==================== -->
+  <section id="view-itinerary" class="hidden space-y-5">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div>
+        <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Itinerário da Viagem</h2>
+        <p class="text-sm text-stone-500 mt-0.5">Cada dia é um capítulo. Preenche tudo ou a aplicação fica ofendida.</p>
+      </div>
+      <button onclick="openDayModal()" class="bg-amber-700 hover:bg-amber-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition shadow-sm shadow-amber-700/20">+ Novo Dia</button>
+    </div>
+    <div id="daysList" class="space-y-5"></div>
+  </section>
+
+  <!-- ==================== VIAJANTES ==================== -->
+  <section id="view-travelers" class="hidden space-y-5">
+    <div class="flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Viajantes</h2>
+        <p class="text-sm text-stone-500 mt-0.5">Os dois heróis desta epopeia (e das discussões sobre quem paga o café).</p>
+      </div>
+      <button onclick="openTravelerModal()" class="bg-amber-700 hover:bg-amber-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition shadow-sm shadow-amber-700/20">+ Viajante</button>
+    </div>
+    <div id="travelersList" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+  </section>
+
+  <!-- ==================== BACKUP ==================== -->
+  <section id="view-backup" class="hidden">
+    <div class="bg-white rounded-2xl border border-stone-200/80 p-7 shadow-sm max-w-xl">
+      <h2 class="text-xl font-extrabold text-stone-900 mb-2 tracking-tight">Sincronização & Backup</h2>
+      <p class="text-sm text-stone-500 mb-6 leading-relaxed">GitHub Pages é estático. A sincronização entre dispositivos faz-se por ficheiro JSON. Exporta num sítio, importa no outro. Brutalmente eficaz.</p>
+      <div class="flex flex-wrap gap-3">
+        <button onclick="exportData()" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition">Exportar Backup</button>
+        <label class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-bold px-5 py-2.5 rounded-xl transition cursor-pointer">
+          Importar Backup
+          <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+        </label>
+      </div>
+      <p class="text-xs text-stone-400 mt-6 leading-relaxed">Guarda o ficheiro no Drive ou Dropbox. Quando quiseres sync em tempo real, ligamos Firebase ou o teu vibe.pt.</p>
+    </div>
+  </section>
+</main>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Day Modal -->
+<div id="dayModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-stone-100">
+    <h3 class="text-lg font-extrabold text-stone-900 mb-5" id="dayModalTitle">Novo Dia</h3>
+    <form id="dayForm" class="space-y-4">
+      <input type="hidden" id="dayId">
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Número do Dia</label>
+        <input type="number" id="dayNumber" min="1" required class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Data</label>
+        <input type="date" id="dayDate" required class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">País principal deste dia</label>
+        <input type="text" id="dayCountry" placeholder="Ex: França" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Título (opcional)</label>
+        <input type="text" id="dayTitle" placeholder="Ex: Chegada a Paris" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Notas do Dia</label>
+        <textarea id="dayNotes" rows="2" placeholder="Qualquer coisa que queiras lembrar..." class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50"></textarea>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 rounded-xl text-sm transition">Guardar</button>
+        <button type="button" onclick="closeDayModal()" class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-3 rounded-xl text-sm transition">Cancelar</button>
+      </div>
+    </form>
+  </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 lg:col-span-1 h-fit">
-<h2 class="text-lg font-semibold text-stone-900 mb-4">Adicionar Despesa</h2>
-<form id="expenseForm" class="space-y-4">
-<div>
-<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Data</label>
-<input type="date" id="expenseDate" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
-</div>
-<div>
-<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Dia do Interrail</label>
-<input type="number" id="expenseDay" min="1" placeholder="Ex: 1" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
-</div>
-<div>
-<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Tipo</label>
-<input type="text" id="expenseType" placeholder="Ex: Comboio, Dormida, Refeição" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
-</div>
-<div>
-<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Descrição</label>
-<input type="text" id="expenseDescription" placeholder="Ex: Bilhete Paris-Berlim" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
-</div>
-<div>
-<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Total (€)</label>
-<input type="number" step="0.01" id="expenseTotal" placeholder="0.00" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
-</div>
-<button type="submit" class="w-full bg-amber-700 text-white font-semibold p-2.5 rounded-xl hover:bg-amber-800 transition duration-200 text-sm shadow-sm">Registar Custo</button>
-</form>
+<!-- Entry Modal -->
+<div id="entryModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[92vh] overflow-y-auto border border-stone-100">
+    <h3 class="text-lg font-extrabold text-stone-900 mb-5" id="entryModalTitle">Nova Entrada</h3>
+    <form id="entryForm" class="space-y-4">
+      <input type="hidden" id="entryId">
+      <input type="hidden" id="entryDayId">
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Tipo</label>
+        <select id="entryType" onchange="toggleEntryFields()" required class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50">
+          <option value="transport">Transporte</option>
+          <option value="accommodation">Dormida / Alojamento</option>
+          <option value="meal">Refeição</option>
+          <option value="activity">Atividade</option>
+          <option value="other">Outro</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Título / Nome</label>
+        <input type="text" id="entryTitle" required placeholder="Ex: TGV 9261 Paris → Lyon" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">País (desta entrada)</label>
+        <input type="text" id="entryCountry" placeholder="Ex: França (opcional se já está no dia)" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Descrição / Notas</label>
+        <input type="text" id="entryDesc" placeholder="Notas livres..." class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Custo Total (€)</label>
+        <input type="number" step="0.01" min="0" id="entryCost" value="0" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 focus:border-amber-600 bg-stone-50/50">
+      </div>
+
+      <!-- TRANSPORT -->
+      <div id="fields-transport" class="space-y-3 border-t border-stone-100 pt-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Meio de transporte</label>
+          <select id="entryTransportMode" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+            <option value="comboio">Comboio</option>
+            <option value="barco">Barco</option>
+            <option value="autocarro">Autocarro</option>
+            <option value="carro">Carro</option>
+            <option value="metro">Metro / Eléctrico</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Nº do Comboio / Linha</label>
+          <input type="text" id="entryTransportNumber" placeholder="Ex: ICE 123 / TGV 9261 / NJ 456" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Carruagem</label>
+            <input type="text" id="entryCarriage" placeholder="Ex: 7" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Lugares</label>
+            <input type="text" id="entrySeats" placeholder="Ex: 42, 43" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Origem (estação/cidade)</label>
+            <input type="text" id="entryFrom" placeholder="Ex: Paris Gare de Lyon" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Destino (estação/cidade)</label>
+            <input type="text" id="entryTo" placeholder="Ex: Lyon Part-Dieu" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Plataforma na Origem</label>
+            <input type="text" id="entryPlatformOrigin" placeholder="Ex: 12" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Plataforma na Chegada</label>
+            <input type="text" id="entryPlatformArrival" placeholder="Ex: 5" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Linha / Via na Origem</label>
+            <input type="text" id="entryLineOrigin" placeholder="Opcional" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Linha / Via na Chegada</label>
+            <input type="text" id="entryLineArrival" placeholder="Opcional" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Hora Partida</label>
+            <input type="time" id="entryTimeFrom" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Hora Chegada</label>
+            <input type="time" id="entryTimeTo" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+          </div>
+        </div>
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="entryNextDay" class="w-4 h-4 rounded border-stone-300 text-amber-700 focus:ring-amber-600">
+          <label for="entryNextDay" class="text-sm text-stone-600 font-medium">Chegada no dia seguinte</label>
+        </div>
+      </div>
+
+      <!-- ACCOMMODATION -->
+      <div id="fields-accommodation" class="space-y-3 border-t border-stone-100 pt-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Tipo de Dormida</label>
+          <select id="entryAccomType" onchange="toggleAccomFields()" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+            <option value="hotel">Hotel / Hostel</option>
+            <option value="comboio">No Comboio (noite)</option>
+            <option value="barco">No Barco (noite)</option>
+            <option value="casa">Casa de Amigos / Couch</option>
+            <option value="camping">Camping</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Localidade</label>
+          <input type="text" id="entryAccomCity" placeholder="Cidade" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Link Google Maps (opcional)</label>
+          <input type="url" id="entryMaps" placeholder="https://maps.google.com/..." class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+        </div>
+
+        <div id="accom-overnight-fields" class="space-y-3 hidden border-t border-stone-100 pt-3">
+          <p class="text-xs text-amber-700 font-semibold">Dormida em transporte — preenche os horários e detalhes:</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Origem</label>
+              <input type="text" id="entryAccomFrom" placeholder="Estação / Porto" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Destino</label>
+              <input type="text" id="entryAccomTo" placeholder="Estação / Porto" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Hora Partida</label>
+              <input type="time" id="entryAccomTimeFrom" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Hora Chegada</label>
+              <input type="time" id="entryAccomTimeTo" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="entryAccomNextDay" class="w-4 h-4 rounded border-stone-300 text-amber-700 focus:ring-amber-600">
+            <label for="entryAccomNextDay" class="text-sm text-stone-600 font-medium">Chegada no dia seguinte</label>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Nº / Linha</label>
+              <input type="text" id="entryAccomNumber" placeholder="Ex: Nightjet 456" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Carruagem / Cabine</label>
+              <input type="text" id="entryAccomCarriage" placeholder="Ex: 14 / Cabine 3" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEAL -->
+      <div id="fields-meal" class="space-y-3 border-t border-stone-100 pt-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Tipo de Refeição</label>
+          <select id="entryMealType" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+            <option value="pequeno-almoco">Pequeno-almoço</option>
+            <option value="almoco">Almoço</option>
+            <option value="jantar">Jantar</option>
+            <option value="lanche">Lanche / Snack</option>
+            <option value="bebidas">Bebidas / Bar</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Local / Restaurante</label>
+          <input type="text" id="entryMealPlace" placeholder="Nome do sítio" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Link Google Maps (opcional)</label>
+          <input type="url" id="entryMealMaps" placeholder="https://maps.google.com/..." class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+        </div>
+      </div>
+
+      <!-- ACTIVITY -->
+      <div id="fields-activity" class="space-y-3 border-t border-stone-100 pt-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Local / Cidade</label>
+          <input type="text" id="entryActPlace" placeholder="Onde foi" class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Link Google Maps (opcional)</label>
+          <input type="url" id="entryActMaps" placeholder="https://maps.google.com/..." class="w-full p-3 rounded-xl border border-stone-200 text-sm bg-stone-50/50">
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-3">
+        <button type="submit" class="flex-1 bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 rounded-xl text-sm transition">Guardar</button>
+        <button type="button" onclick="closeEntryModal()" class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-3 rounded-xl text-sm transition">Cancelar</button>
+      </div>
+    </form>
+  </div>
 </div>
 
-<div class="space-y-8 lg:col-span-2">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-<h2 class="text-sm font-bold text-stone-700 uppercase tracking-wider mb-4">Gastos por Categoria</h2>
-<div class="relative h-56 flex justify-center items-center">
-<canvas id="categoryChart"></canvas>
-</div>
-</div>
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-<h2 class="text-sm font-bold text-stone-700 uppercase tracking-wider mb-4">Evolução por Dia</h2>
-<div class="relative h-56 flex justify-center items-center">
-<canvas id="dailyChart"></canvas>
-</div>
-</div>
-</div>
-
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-<div class="flex justify-between items-center mb-4">
-<h2 class="text-lg font-semibold text-stone-900">Histórico de Despesas</h2>
-<span id="transactionCount" class="text-xs font-semibold text-stone-400 bg-stone-100 px-2.5 py-1 rounded-full">0 registos</span>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left text-sm">
-<thead class="bg-stone-50 border-b border-stone-200 text-stone-400 uppercase text-xs">
-<tr>
-<th class="p-3 cursor-pointer hover:text-stone-600 select-none" onclick="sortTable('date')">Data / Dia ↕</th>
-<th class="p-3 cursor-pointer hover:text-stone-600 select-none" onclick="sortTable('type')">Tipo ↕</th>
-<th class="p-3 cursor-pointer hover:text-stone-600 select-none" onclick="sortTable('description')">Descrição ↕</th>
-<th class="p-3 cursor-pointer hover:text-stone-600 select-none" onclick="sortTable('total')">Total ↕</th>
-<th class="p-3">Metade</th>
-<th class="p-3 text-right">Ações</th>
-</tr>
-</thead>
-<tbody id="expenseTableBody" class="divide-y divide-stone-100">
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
+<!-- Traveler Modal -->
+<div id="travelerModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto border border-stone-100">
+    <h3 class="text-lg font-extrabold text-stone-900 mb-5" id="travelerModalTitle">Novo Viajante</h3>
+    <form id="travelerForm" class="space-y-4">
+      <input type="hidden" id="travelerId">
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Nome</label>
+        <input type="text" id="travelerName" required class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Contacto / Telefone</label>
+        <input type="text" id="travelerPhone" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Email</label>
+        <input type="email" id="travelerEmail" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Pass Interrail (nº / tipo)</label>
+        <input type="text" id="travelerPass" placeholder="Ex: Global Pass 15 dias" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Seguro de Viagem</label>
+        <input type="text" id="travelerInsurance" placeholder="Companhia + nº apólice" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 bg-stone-50/50">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Notas</label>
+        <textarea id="travelerNotes" rows="2" class="w-full p-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600/50 bg-stone-50/50"></textarea>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 rounded-xl text-sm transition">Guardar</button>
+        <button type="button" onclick="closeTravelerModal()" class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-3 rounded-xl text-sm transition">Cancelar</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
-let expenses = JSON.parse(localStorage.getItem('interrail_expenses')) || [];
+// ==================== STATE ====================
+let data = { days: [], travelers: [] };
 let categoryChartInstance = null;
 let dailyChartInstance = null;
-let currentSortColumn = 'date';
-let currentSortDirection = 'asc';
+let currentTab = 'dashboard';
+const NUM_TRAVELERS = 2;
 
-const expenseForm = document.getElementById('expenseForm');
-const expenseTableBody = document.getElementById('expenseTableBody');
-const totalSpentEl = document.getElementById('totalSpent');
-const perPersonEl = document.getElementById('perPerson');
-const dailyAverageEl = document.getElementById('dailyAverage');
-const peakDayEl = document.getElementById('peakDay');
-const transactionCountEl = document.getElementById('transactionCount');
-
-function saveData() {
-localStorage.setItem('interrail_expenses', JSON.stringify(expenses));
+// ==================== UTILS ====================
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function save() { localStorage.setItem('interrail_v2', JSON.stringify(data)); }
+function load() {
+  const raw = localStorage.getItem('interrail_v2');
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+      if (!data.days) data.days = [];
+      if (!data.travelers) data.travelers = [];
+    } catch (e) { console.error(e); }
+  }
+}
+function formatMoney(v) { return (parseFloat(v) || 0).toFixed(2) + ' €'; }
+function halfMoney(v) { return ((parseFloat(v) || 0) / NUM_TRAVELERS).toFixed(2) + ' €'; }
+function typeLabel(t) {
+  return { transport: 'Transporte', accommodation: 'Dormida', meal: 'Refeição', activity: 'Atividade', other: 'Outro' }[t] || t;
+}
+function typeColor(t) {
+  return {
+    transport: 'bg-sky-100 text-sky-800',
+    accommodation: 'bg-violet-100 text-violet-800',
+    meal: 'bg-amber-100 text-amber-800',
+    activity: 'bg-emerald-100 text-emerald-800',
+    other: 'bg-stone-100 text-stone-700'
+  }[t] || 'bg-stone-100 text-stone-700';
 }
 
-function sortTable(column) {
-if (currentSortColumn === column) {
-currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-} else {
-currentSortColumn = column;
-currentSortDirection = 'asc';
-}
-renderApp();
-}
-
-function renderApp() {
-expenseTableBody.innerHTML = '';
-let totalSum = 0;
-const dailyTotals = {};
-
-expenses.sort((a, b) => {
-let valA = a[currentSortColumn];
-let valB = b[currentSortColumn];
-
-if (currentSortColumn === 'date') {
-valA = new Date(valA);
-valB = new Date(valB);
-} else if (currentSortColumn === 'day' || currentSortColumn === 'total') {
-valA = parseFloat(valA);
-valB = parseFloat(valB);
-} else if (typeof valA === 'string') {
-valA = valA.toLowerCase();
-valB = valB.toLowerCase();
+function collectCountries() {
+  const set = new Set();
+  data.days.forEach(day => {
+    if (day.country && day.country.trim()) set.add(day.country.trim());
+    (day.entries || []).forEach(e => {
+      if (e.country && e.country.trim()) set.add(e.country.trim());
+    });
+  });
+  return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt'));
 }
 
-if (valA < valB) return currentSortDirection === 'asc' ? -1 : 1;
-if (valA > valB) return currentSortDirection === 'asc' ? 1 : -1;
-return 0;
+// ==================== TABS ====================
+function switchTab(tab) {
+  currentTab = tab;
+  ['dashboard', 'itinerary', 'travelers', 'backup'].forEach(t => {
+    document.getElementById('view-' + t).classList.toggle('hidden', t !== tab);
+    document.getElementById('tab-' + t).classList.toggle('tab-active', t === tab);
+  });
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'itinerary') renderDays();
+  if (tab === 'travelers') renderTravelers();
+}
+
+// ==================== DASHBOARD ====================
+function getAllEntries() {
+  const entries = [];
+  data.days.forEach(day => {
+    (day.entries || []).forEach(e => entries.push({ ...e, dayNumber: day.number, dayDate: day.date }));
+  });
+  return entries;
+}
+
+function renderDashboard() {
+  const entries = getAllEntries();
+  const total = entries.reduce((s, e) => s + (parseFloat(e.cost) || 0), 0);
+  const daysWithCost = {};
+  entries.forEach(e => {
+    daysWithCost[e.dayNumber] = (daysWithCost[e.dayNumber] || 0) + (parseFloat(e.cost) || 0);
+  });
+  const uniqueDays = Object.keys(daysWithCost).length || data.days.length;
+  const dailyAvg = uniqueDays > 0 ? total / uniqueDays : 0;
+  const peak = uniqueDays > 0 ? Math.max(...Object.values(daysWithCost), 0) : 0;
+  const countries = collectCountries();
+
+  document.getElementById('kpiTotal').textContent = formatMoney(total);
+  document.getElementById('kpiPerPerson').textContent = formatMoney(total / NUM_TRAVELERS);
+  document.getElementById('kpiDailyAvg').textContent = formatMoney(dailyAvg);
+  document.getElementById('kpiPeak').textContent = formatMoney(peak);
+  document.getElementById('hdrTotal').textContent = formatMoney(total);
+  document.getElementById('hdrPerPerson').textContent = formatMoney(total / NUM_TRAVELERS);
+  document.getElementById('hdrDays').textContent = data.days.length;
+  document.getElementById('hdrCountries').textContent = countries.length;
+
+  document.getElementById('statNights').textContent = entries.filter(e => e.type === 'accommodation').length;
+  document.getElementById('statTransports').textContent = entries.filter(e => e.type === 'transport').length;
+  document.getElementById('statMeals').textContent = entries.filter(e => e.type === 'meal').length;
+  document.getElementById('statActivities').textContent = entries.filter(e => e.type === 'activity').length;
+
+  const cl = document.getElementById('countriesList');
+  if (countries.length === 0) {
+    cl.innerHTML = '<span class="text-sm text-stone-400">Ainda nenhum país. Preenche o campo “País” nos dias ou nas entradas.</span>';
+  } else {
+    cl.innerHTML = countries.map(c => `
+      <span class="inline-flex items-center gap-1.5 bg-stone-100 text-stone-700 text-xs font-bold px-3 py-1.5 rounded-full border border-stone-200/60">
+        ${c}
+      </span>`).join('');
+  }
+
+  const recent = [...entries].sort((a, b) => (b.dayNumber || 0) - (a.dayNumber || 0)).slice(0, 8);
+  const re = document.getElementById('recentEntries');
+  if (recent.length === 0) {
+    re.innerHTML = '<p class="text-stone-400 text-sm">Nada ainda. A viagem ainda não começou ou estás a dormir.</p>';
+  } else {
+    re.innerHTML = recent.map(e => `
+      <div class="flex justify-between items-center gap-3 py-2 border-b border-stone-50 last:border-0">
+        <div class="min-w-0">
+          <span class="text-[10px] font-bold uppercase tracking-wider ${typeColor(e.type)} px-1.5 py-0.5 rounded mr-1.5">${typeLabel(e.type)}</span>
+          <span class="text-stone-800 font-medium truncate">${e.title}</span>
+          <span class="text-stone-400 text-xs ml-1.5">Dia ${e.dayNumber}</span>
+        </div>
+        <div class="text-right shrink-0">
+          <div class="font-bold text-stone-900 text-sm cost-badge">${formatMoney(e.cost)}</div>
+          <div class="text-[11px] text-amber-700 font-semibold cost-badge">${halfMoney(e.cost)}</div>
+        </div>
+      </div>`).join('');
+  }
+  updateCharts(entries, daysWithCost);
+}
+
+function updateCharts(entries, daysWithCost) {
+  const cats = {};
+  entries.forEach(e => {
+    const label = typeLabel(e.type);
+    cats[label] = (cats[label] || 0) + (parseFloat(e.cost) || 0);
+  });
+  const catEntries = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  const ctxCat = document.getElementById('categoryChart').getContext('2d');
+  if (categoryChartInstance) categoryChartInstance.destroy();
+  categoryChartInstance = new Chart(ctxCat, {
+    type: 'doughnut',
+    data: {
+      labels: catEntries.map(c => c[0]),
+      datasets: [{ data: catEntries.map(c => c[1]), backgroundColor: ['#b45309', '#0284c7', '#7c3aed', '#059669', '#78716c', '#e11d48'], borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+  });
+
+  const sortedDays = Object.entries(daysWithCost).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+  const ctxDaily = document.getElementById('dailyChart').getContext('2d');
+  if (dailyChartInstance) dailyChartInstance.destroy();
+  dailyChartInstance = new Chart(ctxDaily, {
+    type: 'bar',
+    data: {
+      labels: sortedDays.map(d => 'Dia ' + d[0]),
+      datasets: [{ label: 'Gasto (€)', data: sortedDays.map(d => d[1]), backgroundColor: '#b45309', borderRadius: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, grid: { color: '#f5f5f4' } }, x: { grid: { display: false } } }
+    }
+  });
+}
+
+// ==================== DAYS ====================
+function renderDays() {
+  const list = document.getElementById('daysList');
+  if (data.days.length === 0) {
+    list.innerHTML = `<div class="bg-white rounded-2xl border border-stone-200/80 p-12 text-center shadow-sm">
+      <p class="text-stone-500 text-sm">Ainda não há dias. Adiciona o Dia 1 e começa a escrita desta epopeia.</p>
+    </div>`;
+    return;
+  }
+
+  const sorted = [...data.days].sort((a, b) => a.number - b.number);
+  list.innerHTML = sorted.map(day => {
+    const dayTotal = (day.entries || []).reduce((s, e) => s + (parseFloat(e.cost) || 0), 0);
+    const entriesHtml = (day.entries || []).length === 0
+      ? '<p class="text-sm text-stone-400 py-3">Nenhuma entrada neste dia. Que vazio existencial.</p>'
+      : (day.entries || []).map(e => renderEntryCard(day.id, e)).join('');
+
+    return `
+      <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+        <div class="day-header p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-stone-100">
+          <div>
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <span class="bg-amber-700 text-white text-xs font-extrabold px-2.5 py-1 rounded-lg tracking-wide">Dia ${day.number}</span>
+              <span class="text-sm font-medium text-stone-500">${day.date || ''}</span>
+              ${day.country ? `<span class="text-xs font-bold bg-stone-200/80 text-stone-700 px-2 py-0.5 rounded-md">${day.country}</span>` : ''}
+            </div>
+            ${day.title ? `<div class="font-bold text-stone-900 mt-1.5 text-base">${day.title}</div>` : ''}
+            ${day.notes ? `<div class="text-sm text-stone-500 mt-1">${day.notes}</div>` : ''}
+          </div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <div class="text-right">
+              <div class="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Total do dia</div>
+              <div class="font-extrabold text-stone-900 cost-badge">${formatMoney(dayTotal)}</div>
+              <div class="text-xs text-amber-700 font-bold cost-badge">${halfMoney(dayTotal)} / pessoa</div>
+            </div>
+            <button onclick="openEntryModal('${day.id}')" class="bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition">+ Entrada</button>
+            <button onclick="editDay('${day.id}')" class="text-xs text-stone-500 hover:text-amber-700 font-bold">Editar</button>
+            <button onclick="deleteDay('${day.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold">Apagar</button>
+          </div>
+        </div>
+        <div class="p-4 sm:p-5 space-y-3">${entriesHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderEntryCard(dayId, e) {
+  return `
+    <div class="entry-card bg-stone-50/80 border border-stone-100 rounded-xl p-4">
+      <div class="flex justify-between items-start gap-4">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider ${typeColor(e.type)} px-2 py-0.5 rounded-md">${typeLabel(e.type)}</span>
+            <span class="font-bold text-stone-900 text-[15px]">${e.title}</span>
+            ${e.country ? `<span class="text-[10px] font-bold bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">${e.country}</span>` : ''}
+          </div>
+          ${e.description ? `<div class="text-sm text-stone-600 mb-2">${e.description}</div>` : ''}
+          ${renderEntryDetails(e)}
+        </div>
+        <div class="text-right shrink-0">
+          <div class="font-extrabold text-stone-900 text-base cost-badge">${formatMoney(e.cost)}</div>
+          <div class="text-sm text-amber-700 font-bold cost-badge mt-0.5">${halfMoney(e.cost)}</div>
+          <div class="flex gap-2.5 mt-2.5 justify-end">
+            <button onclick="editEntry('${dayId}','${e.id}')" class="text-xs text-stone-500 hover:text-amber-700 font-bold">Editar</button>
+            <button onclick="deleteEntry('${dayId}','${e.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold">Apagar</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderEntryDetails(e) {
+  if (e.type === 'transport') {
+    let pills = '';
+    if (e.transportMode) pills += pill('Meio', e.transportMode);
+    if (e.transportNumber) pills += pill('Nº Comboio / Linha', e.transportNumber);
+    if (e.carriage) pills += pill('Carruagem', e.carriage);
+    if (e.seats) pills += pill('Lugares', e.seats);
+    if (e.from) pills += pill('Origem', e.from);
+    if (e.to) pills += pill('Destino', e.to);
+    if (e.platformOrigin) pills += pill('Plataforma Origem', e.platformOrigin);
+    if (e.platformArrival) pills += pill('Plataforma Chegada', e.platformArrival);
+    if (e.lineOrigin) pills += pill('Linha/Via Origem', e.lineOrigin);
+    if (e.lineArrival) pills += pill('Linha/Via Chegada', e.lineArrival);
+    if (e.timeFrom || e.timeTo) {
+      const next = e.nextDay ? ' <span class="text-amber-600 font-bold">(+1 dia)</span>' : '';
+      pills += pill('Horário', `${e.timeFrom || '—'} → ${e.timeTo || '—'}${next}`);
+    }
+    return pills ? `<div class="info-grid mt-2.5">${pills}</div>` : '';
+  }
+
+  if (e.type === 'accommodation') {
+    let pills = '';
+    if (e.accomType) pills += pill('Tipo', e.accomType);
+    if (e.accomCity) pills += pill('Localidade', e.accomCity);
+    if (e.accomType === 'comboio' || e.accomType === 'barco') {
+      if (e.accomFrom) pills += pill('Origem', e.accomFrom);
+      if (e.accomTo) pills += pill('Destino', e.accomTo);
+      if (e.accomTimeFrom || e.accomTimeTo) {
+        const next = e.accomNextDay ? ' <span class="text-amber-600 font-bold">(+1 dia)</span>' : '';
+        pills += pill('Horário', `${e.accomTimeFrom || '—'} → ${e.accomTimeTo || '—'}${next}`);
+      }
+      if (e.accomNumber) pills += pill('Nº / Linha', e.accomNumber);
+      if (e.accomCarriage) pills += pill('Carruagem/Cabine', e.accomCarriage);
+    }
+    let html = pills ? `<div class="info-grid mt-2.5">${pills}</div>` : '';
+    if (e.mapsUrl) html += `<a href="${e.mapsUrl}" target="_blank" class="inline-block mt-2 text-sm font-semibold text-amber-700 hover:underline">Ver no Google Maps →</a>`;
+    return html;
+  }
+
+  if (e.type === 'meal') {
+    let pills = '';
+    if (e.mealType) pills += pill('Tipo', e.mealType);
+    if (e.mealPlace) pills += pill('Local', e.mealPlace);
+    let html = pills ? `<div class="info-grid mt-2.5">${pills}</div>` : '';
+    if (e.mealMaps) html += `<a href="${e.mealMaps}" target="_blank" class="inline-block mt-2 text-sm font-semibold text-amber-700 hover:underline">Ver no Google Maps →</a>`;
+    return html;
+  }
+
+  if (e.type === 'activity') {
+    let html = e.actPlace ? `<div class="info-grid mt-2.5">${pill('Local', e.actPlace)}</div>` : '';
+    if (e.actMaps) html += `<a href="${e.actMaps}" target="_blank" class="inline-block mt-2 text-sm font-semibold text-amber-700 hover:underline">Ver no Google Maps →</a>`;
+    return html;
+  }
+  return '';
+}
+
+function pill(label, value) {
+  return `<div class="info-pill"><div class="label">${label}</div><div class="value">${value}</div></div>`;
+}
+
+// ==================== DAY CRUD ====================
+function openDayModal(id = null) {
+  document.getElementById('dayModal').classList.remove('hidden');
+  document.getElementById('dayModal').classList.add('flex');
+  document.getElementById('dayForm').reset();
+  document.getElementById('dayId').value = '';
+  document.getElementById('dayModalTitle').textContent = 'Novo Dia';
+  if (id) {
+    const day = data.days.find(d => d.id === id);
+    if (day) {
+      document.getElementById('dayId').value = day.id;
+      document.getElementById('dayNumber').value = day.number;
+      document.getElementById('dayDate').value = day.date || '';
+      document.getElementById('dayCountry').value = day.country || '';
+      document.getElementById('dayTitle').value = day.title || '';
+      document.getElementById('dayNotes').value = day.notes || '';
+      document.getElementById('dayModalTitle').textContent = 'Editar Dia';
+    }
+  }
+}
+function closeDayModal() {
+  document.getElementById('dayModal').classList.add('hidden');
+  document.getElementById('dayModal').classList.remove('flex');
+}
+function editDay(id) { openDayModal(id); }
+function deleteDay(id) {
+  if (!confirm('Apagar este dia e todas as suas entradas? Não há volta a dar.')) return;
+  data.days = data.days.filter(d => d.id !== id);
+  save(); renderDays(); renderDashboard();
+}
+document.getElementById('dayForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('dayId').value;
+  const payload = {
+    number: parseInt(document.getElementById('dayNumber').value),
+    date: document.getElementById('dayDate').value,
+    country: document.getElementById('dayCountry').value.trim(),
+    title: document.getElementById('dayTitle').value.trim(),
+    notes: document.getElementById('dayNotes').value.trim(),
+    entries: []
+  };
+  if (id) {
+    const idx = data.days.findIndex(d => d.id === id);
+    if (idx >= 0) {
+      payload.entries = data.days[idx].entries || [];
+      payload.id = id;
+      data.days[idx] = payload;
+    }
+  } else {
+    payload.id = uid();
+    data.days.push(payload);
+  }
+  save(); closeDayModal(); renderDays(); renderDashboard();
 });
 
-expenses.forEach((expense, index) => {
-const amount = parseFloat(expense.total);
-totalSum += amount;
+// ==================== ENTRY CRUD ====================
+function openEntryModal(dayId, entryId = null) {
+  document.getElementById('entryModal').classList.remove('hidden');
+  document.getElementById('entryModal').classList.add('flex');
+  document.getElementById('entryForm').reset();
+  document.getElementById('entryId').value = '';
+  document.getElementById('entryDayId').value = dayId;
+  document.getElementById('entryModalTitle').textContent = 'Nova Entrada';
+  document.getElementById('entryType').value = 'transport';
+  toggleEntryFields();
+  toggleAccomFields();
 
-const dayKey = `Dia ${expense.day} (${expense.date})`;
-dailyTotals[dayKey] = (dailyTotals[dayKey] || 0) + amount;
+  if (entryId) {
+    const day = data.days.find(d => d.id === dayId);
+    const entry = day?.entries?.find(e => e.id === entryId);
+    if (entry) {
+      document.getElementById('entryId').value = entry.id;
+      document.getElementById('entryType').value = entry.type;
+      document.getElementById('entryTitle').value = entry.title || '';
+      document.getElementById('entryCountry').value = entry.country || '';
+      document.getElementById('entryDesc').value = entry.description || '';
+      document.getElementById('entryCost').value = entry.cost || 0;
+      // transport
+      document.getElementById('entryTransportMode').value = entry.transportMode || 'comboio';
+      document.getElementById('entryTransportNumber').value = entry.transportNumber || '';
+      document.getElementById('entryCarriage').value = entry.carriage || '';
+      document.getElementById('entrySeats').value = entry.seats || '';
+      document.getElementById('entryFrom').value = entry.from || '';
+      document.getElementById('entryTo').value = entry.to || '';
+      document.getElementById('entryPlatformOrigin').value = entry.platformOrigin || '';
+      document.getElementById('entryPlatformArrival').value = entry.platformArrival || '';
+      document.getElementById('entryLineOrigin').value = entry.lineOrigin || '';
+      document.getElementById('entryLineArrival').value = entry.lineArrival || '';
+      document.getElementById('entryTimeFrom').value = entry.timeFrom || '';
+      document.getElementById('entryTimeTo').value = entry.timeTo || '';
+      document.getElementById('entryNextDay').checked = !!entry.nextDay;
+      // accom
+      document.getElementById('entryAccomType').value = entry.accomType || 'hotel';
+      document.getElementById('entryAccomCity').value = entry.accomCity || '';
+      document.getElementById('entryMaps').value = entry.mapsUrl || '';
+      document.getElementById('entryAccomFrom').value = entry.accomFrom || '';
+      document.getElementById('entryAccomTo').value = entry.accomTo || '';
+      document.getElementById('entryAccomTimeFrom').value = entry.accomTimeFrom || '';
+      document.getElementById('entryAccomTimeTo').value = entry.accomTimeTo || '';
+      document.getElementById('entryAccomNextDay').checked = !!entry.accomNextDay;
+      document.getElementById('entryAccomNumber').value = entry.accomNumber || '';
+      document.getElementById('entryAccomCarriage').value = entry.accomCarriage || '';
+      // meal
+      document.getElementById('entryMealType').value = entry.mealType || 'almoco';
+      document.getElementById('entryMealPlace').value = entry.mealPlace || '';
+      document.getElementById('entryMealMaps').value = entry.mealMaps || '';
+      // activity
+      document.getElementById('entryActPlace').value = entry.actPlace || '';
+      document.getElementById('entryActMaps').value = entry.actMaps || '';
+      document.getElementById('entryModalTitle').textContent = 'Editar Entrada';
+      toggleEntryFields();
+      toggleAccomFields();
+    }
+  }
+}
+function closeEntryModal() {
+  document.getElementById('entryModal').classList.add('hidden');
+  document.getElementById('entryModal').classList.remove('flex');
+}
+function toggleEntryFields() {
+  const t = document.getElementById('entryType').value;
+  ['transport', 'accommodation', 'meal', 'activity'].forEach(f => {
+    document.getElementById('fields-' + f).classList.toggle('hidden', f !== t);
+  });
+}
+function toggleAccomFields() {
+  const t = document.getElementById('entryAccomType').value;
+  const show = (t === 'comboio' || t === 'barco');
+  document.getElementById('accom-overnight-fields').classList.toggle('hidden', !show);
+}
+function editEntry(dayId, entryId) { openEntryModal(dayId, entryId); }
+function deleteEntry(dayId, entryId) {
+  if (!confirm('Apagar esta entrada?')) return;
+  const day = data.days.find(d => d.id === dayId);
+  if (day) {
+    day.entries = (day.entries || []).filter(e => e.id !== entryId);
+    save(); renderDays(); renderDashboard();
+  }
+}
+document.getElementById('entryForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const dayId = document.getElementById('entryDayId').value;
+  const entryId = document.getElementById('entryId').value;
+  const type = document.getElementById('entryType').value;
 
-const half = (amount / 2).toFixed(2);
-const row = document.createElement('tr');
-row.innerHTML = `
-<td class="p-3"><div class="font-semibold text-stone-900">${expense.date}</div><div class="text-xs text-stone-400">Dia ${expense.day}</div></td>
-<td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-100 text-stone-700">${expense.type}</span></td>
-<td class="p-3 text-stone-600">${expense.description}</td>
-<td class="p-3 font-semibold text-stone-900">${amount.toFixed(2)} €</td>
-<td class="p-3 text-amber-700 font-semibold">${half} €</td>
-<td class="p-3 text-right"><button onclick="deleteExpense(${index})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold">Apagar</button></td>
-`;
-expenseTableBody.appendChild(row);
+  const entry = {
+    id: entryId || uid(),
+    type,
+    title: document.getElementById('entryTitle').value.trim(),
+    country: document.getElementById('entryCountry').value.trim(),
+    description: document.getElementById('entryDesc').value.trim(),
+    cost: parseFloat(document.getElementById('entryCost').value) || 0
+  };
+
+  if (type === 'transport') {
+    entry.transportMode = document.getElementById('entryTransportMode').value;
+    entry.transportNumber = document.getElementById('entryTransportNumber').value.trim();
+    entry.carriage = document.getElementById('entryCarriage').value.trim();
+    entry.seats = document.getElementById('entrySeats').value.trim();
+    entry.from = document.getElementById('entryFrom').value.trim();
+    entry.to = document.getElementById('entryTo').value.trim();
+    entry.platformOrigin = document.getElementById('entryPlatformOrigin').value.trim();
+    entry.platformArrival = document.getElementById('entryPlatformArrival').value.trim();
+    entry.lineOrigin = document.getElementById('entryLineOrigin').value.trim();
+    entry.lineArrival = document.getElementById('entryLineArrival').value.trim();
+    entry.timeFrom = document.getElementById('entryTimeFrom').value;
+    entry.timeTo = document.getElementById('entryTimeTo').value;
+    entry.nextDay = document.getElementById('entryNextDay').checked;
+  }
+  if (type === 'accommodation') {
+    entry.accomType = document.getElementById('entryAccomType').value;
+    entry.accomCity = document.getElementById('entryAccomCity').value.trim();
+    entry.mapsUrl = document.getElementById('entryMaps').value.trim();
+    entry.accomFrom = document.getElementById('entryAccomFrom').value.trim();
+    entry.accomTo = document.getElementById('entryAccomTo').value.trim();
+    entry.accomTimeFrom = document.getElementById('entryAccomTimeFrom').value;
+    entry.accomTimeTo = document.getElementById('entryAccomTimeTo').value;
+    entry.accomNextDay = document.getElementById('entryAccomNextDay').checked;
+    entry.accomNumber = document.getElementById('entryAccomNumber').value.trim();
+    entry.accomCarriage = document.getElementById('entryAccomCarriage').value.trim();
+  }
+  if (type === 'meal') {
+    entry.mealType = document.getElementById('entryMealType').value;
+    entry.mealPlace = document.getElementById('entryMealPlace').value.trim();
+    entry.mealMaps = document.getElementById('entryMealMaps').value.trim();
+  }
+  if (type === 'activity') {
+    entry.actPlace = document.getElementById('entryActPlace').value.trim();
+    entry.actMaps = document.getElementById('entryActMaps').value.trim();
+  }
+
+  const day = data.days.find(d => d.id === dayId);
+  if (!day) return;
+  if (!day.entries) day.entries = [];
+  if (entryId) {
+    const idx = day.entries.findIndex(e => e.id === entryId);
+    if (idx >= 0) day.entries[idx] = entry;
+  } else {
+    day.entries.push(entry);
+  }
+  save(); closeEntryModal(); renderDays(); renderDashboard();
 });
 
-const uniqueDays = Object.keys(dailyTotals).length;
-const dailyAvg = uniqueDays > 0 ? totalSum / uniqueDays : 0;
-const peakVal = uniqueDays > 0 ? Math.max(...Object.values(dailyTotals)) : 0;
-
-totalSpentEl.textContent = `${totalSum.toFixed(2)} €`;
-perPersonEl.textContent = `${(totalSum / 2).toFixed(2)} €`;
-dailyAverageEl.textContent = `${dailyAvg.toFixed(2)} €`;
-peakDayEl.textContent = `${peakVal.toFixed(2)} €`;
-transactionCountEl.textContent = `${expenses.length} registos`;
-
-updateCharts();
+// ==================== TRAVELERS ====================
+function renderTravelers() {
+  const list = document.getElementById('travelersList');
+  if (data.travelers.length === 0) {
+    list.innerHTML = `<div class="bg-white rounded-2xl border border-stone-200/80 p-10 text-center col-span-full shadow-sm">
+      <p class="text-stone-500 text-sm">Ainda ninguém. Adiciona os dois aventureiros antes que se percam um ao outro na Europa.</p>
+    </div>`;
+    return;
+  }
+  list.innerHTML = data.travelers.map(t => `
+    <div class="bg-white rounded-2xl border border-stone-200/80 p-5 shadow-sm">
+      <div class="flex justify-between items-start mb-3">
+        <h3 class="font-extrabold text-stone-900 text-lg tracking-tight">${t.name}</h3>
+        <div class="flex gap-2.5">
+          <button onclick="editTraveler('${t.id}')" class="text-xs text-stone-500 hover:text-amber-700 font-bold">Editar</button>
+          <button onclick="deleteTraveler('${t.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold">Apagar</button>
+        </div>
+      </div>
+      <div class="space-y-1.5 text-sm text-stone-600">
+        ${t.phone ? `<div><span class="text-stone-400 text-[10px] uppercase font-bold tracking-wider">Tel</span> ${t.phone}</div>` : ''}
+        ${t.email ? `<div><span class="text-stone-400 text-[10px] uppercase font-bold tracking-wider">Email</span> ${t.email}</div>` : ''}
+        ${t.pass ? `<div><span class="text-stone-400 text-[10px] uppercase font-bold tracking-wider">Pass</span> ${t.pass}</div>` : ''}
+        ${t.insurance ? `<div><span class="text-stone-400 text-[10px] uppercase font-bold tracking-wider">Seguro</span> ${t.insurance}</div>` : ''}
+        ${t.notes ? `<div class="pt-2.5 text-sm text-stone-500 border-t border-stone-100 mt-2.5">${t.notes}</div>` : ''}
+      </div>
+    </div>`).join('');
 }
-
-function deleteExpense(index) {
-expenses.splice(index, 1);
-saveData();
-renderApp();
+function openTravelerModal(id = null) {
+  document.getElementById('travelerModal').classList.remove('hidden');
+  document.getElementById('travelerModal').classList.add('flex');
+  document.getElementById('travelerForm').reset();
+  document.getElementById('travelerId').value = '';
+  document.getElementById('travelerModalTitle').textContent = 'Novo Viajante';
+  if (id) {
+    const t = data.travelers.find(x => x.id === id);
+    if (t) {
+      document.getElementById('travelerId').value = t.id;
+      document.getElementById('travelerName').value = t.name || '';
+      document.getElementById('travelerPhone').value = t.phone || '';
+      document.getElementById('travelerEmail').value = t.email || '';
+      document.getElementById('travelerPass').value = t.pass || '';
+      document.getElementById('travelerInsurance').value = t.insurance || '';
+      document.getElementById('travelerNotes').value = t.notes || '';
+      document.getElementById('travelerModalTitle').textContent = 'Editar Viajante';
+    }
+  }
 }
+function closeTravelerModal() {
+  document.getElementById('travelerModal').classList.add('hidden');
+  document.getElementById('travelerModal').classList.remove('flex');
+}
+function editTraveler(id) { openTravelerModal(id); }
+function deleteTraveler(id) {
+  if (!confirm('Apagar este viajante?')) return;
+  data.travelers = data.travelers.filter(t => t.id !== id);
+  save(); renderTravelers();
+}
+document.getElementById('travelerForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('travelerId').value;
+  const payload = {
+    id: id || uid(),
+    name: document.getElementById('travelerName').value.trim(),
+    phone: document.getElementById('travelerPhone').value.trim(),
+    email: document.getElementById('travelerEmail').value.trim(),
+    pass: document.getElementById('travelerPass').value.trim(),
+    insurance: document.getElementById('travelerInsurance').value.trim(),
+    notes: document.getElementById('travelerNotes').value.trim()
+  };
+  if (id) {
+    const idx = data.travelers.findIndex(t => t.id === id);
+    if (idx >= 0) data.travelers[idx] = payload;
+  } else data.travelers.push(payload);
+  save(); closeTravelerModal(); renderTravelers();
+});
 
+// ==================== BACKUP ====================
 function exportData() {
-const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(expenses));
-const downloadAnchor = document.createElement('a');
-downloadAnchor.setAttribute("href", dataStr);
-downloadAnchor.setAttribute("download", "interrail_backup.json");
-document.body.appendChild(downloadAnchor);
-downloadAnchor.click();
-downloadAnchor.remove();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `interrail_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
-
 function importData(event) {
-const fileReader = new FileReader();
-if (event.target.files[0]) {
-fileReader.readAsText(event.target.files[0], "UTF-8");
-fileReader.onload = (e) => {
-try {
-const importedExpenses = JSON.parse(e.target.result);
-if (Array.isArray(importedExpenses)) {
-expenses = importedExpenses;
-saveData();
-renderApp();
-alert("Dados importados com sucesso!");
-} else {
-alert("Formato de ficheiro inválido.");
-}
-} catch (error) {
-alert("Erro ao ler o ficheiro.");
-}
-};
-}
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (imported.days || imported.travelers) {
+        data = { days: imported.days || [], travelers: imported.travelers || [] };
+        save();
+        renderDashboard(); renderDays(); renderTravelers();
+        alert('Backup importado com sucesso. Os dados antigos foram substituídos.');
+      } else alert('Ficheiro inválido.');
+    } catch (err) { alert('Erro ao ler o ficheiro.'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
 }
 
-function updateCharts() {
-const categories = {};
-const dailyTimeline = {};
-
-expenses.forEach(exp => {
-categories[exp.type] = (categories[exp.type] || 0) + parseFloat(exp.total);
-const dayLabel = `Dia ${exp.day}`;
-dailyTimeline[dayLabel] = (dailyTimeline[dayLabel] || 0) + parseFloat(exp.total);
-});
-
-const sortedCategories = Object.entries(categories).sort((a, b) => b[1] - a[1]);
-const catLabels = sortedCategories.map(item => item[0]);
-const catData = sortedCategories.map(item => item[1]);
-
-const ctxCategory = document.getElementById('categoryChart').getContext('2d');
-if (categoryChartInstance) {
-categoryChartInstance.destroy();
-}
-
-categoryChartInstance = new Chart(ctxCategory, {
-type: 'doughnut',
-data: {
-labels: catLabels,
-datasets: [{
-data: catData,
-backgroundColor: ['#b45309', '#d97706', '#f59e0b', '#78716c', '#57534e', '#292524', '#e11d48', '#0284c7'],
-borderWidth: 0
-}]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: {
-legend: {
-position: 'bottom',
-labels: { boxWidth: 12, font: { size: 11 } }
-}
-}
-}
-});
-
-const sortedDays = Object.entries(dailyTimeline).sort((a, b) => {
-return parseInt(a[0].replace('Dia ', '')) - parseInt(b[0].replace('Dia ', ''));
-});
-const dayLabels = sortedDays.map(item => item[0]);
-const dayData = sortedDays.map(item => item[1]);
-
-const ctxDaily = document.getElementById('dailyChart').getContext('2d');
-if (dailyChartInstance) {
-dailyChartInstance.destroy();
-}
-
-dailyChartInstance = new Chart(ctxDaily, {
-type: 'bar',
-data: {
-labels: dayLabels,
-datasets: [{
-label: 'Gasto Diário (€)',
-data: dayData,
-backgroundColor: '#b45309',
-borderRadius: 6
-}]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: {
-legend: { display: false }
-},
-scales: {
-y: { beginAtZero: true, grid: { color: '#f5f5f4' } },
-x: { grid: { display: false } }
-}
-}
-});
-}
-
-expenseForm.addEventListener('submit', (e) => {
-e.preventDefault();
-const newExpense = {
-date: document.getElementById('expenseDate').value,
-day: document.getElementById('expenseDay').value,
-type: document.getElementById('expenseType').value.trim(),
-description: document.getElementById('expenseDescription').value,
-total: parseFloat(document.getElementById('expenseTotal').value)
-};
-expenses.push(newExpense);
-saveData();
-renderApp();
-expenseForm.reset();
-});
-
-renderApp();
+// ==================== INIT ====================
+load();
+renderDashboard();
+renderDays();
+renderTravelers();
 </script>
 </body>
 </html>
