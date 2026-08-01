@@ -3,93 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InterRail - Despesas</title>
+<title>InterRail - Central Financeira</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
-<div class="max-w-4xl mx-auto space-y-8">
-<header class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+<body class="bg-stone-100 text-stone-800 min-h-screen p-4 md:p-8">
+<div class="max-w-6xl mx-auto space-y-8">
+<header class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 flex flex-col md:flex-row justify-between items-center gap-4">
 <div>
-<h1 class="text-2xl font-bold text-slate-900">InterRail - Despesas</h1>
-<p class="text-sm text-slate-500">Contabilidade rigorosa para evitar dramas.</p>
+<h1 class="text-2xl font-bold text-stone-900 tracking-tight">InterRail // Central de Controlo</h1>
+<p class="text-sm text-stone-500">Gestão financeira impiedosa para evitar divórcios de amizade a meio da Europa.</p>
 </div>
-<div class="flex items-center gap-4">
-<div class="flex gap-4 text-center">
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-<span class="block text-xs text-slate-400 uppercase font-semibold">Total Gasto</span>
-<span id="totalSpent" class="text-lg font-bold text-slate-900">0.00 €</span>
+<div class="flex flex-wrap gap-3 text-center">
+<div class="bg-stone-50 p-3 rounded-xl border border-stone-200 min-w-[110px]">
+<span class="block text-[10px] text-stone-400 uppercase font-bold tracking-wider">Total Gasto</span>
+<span id="totalSpent" class="text-base font-bold text-stone-900">0.00 €</span>
 </div>
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-<span class="block text-xs text-slate-400 uppercase font-semibold">Por Pessoa</span>
-<span id="perPerson" class="text-lg font-bold text-indigo-600">0.00 €</span>
+<div class="bg-stone-50 p-3 rounded-xl border border-stone-200 min-w-[110px]">
+<span class="block text-[10px] text-stone-400 uppercase font-bold tracking-wider">Por Pessoa</span>
+<span id="perPerson" class="text-base font-bold text-amber-700">0.00 €</span>
 </div>
+<div class="bg-stone-50 p-3 rounded-xl border border-stone-200 min-w-[110px]">
+<span class="block text-[10px] text-stone-400 uppercase font-bold tracking-wider">Média / Dia</span>
+<span id="dailyAverage" class="text-base font-bold text-stone-900">0.00 €</span>
+</div>
+<div class="bg-stone-50 p-3 rounded-xl border border-stone-200 min-w-[110px]">
+<span class="block text-[10px] text-stone-400 uppercase font-bold tracking-wider">Pico Diário</span>
+<span id="peakDay" class="text-base font-bold text-stone-900">0.00 €</span>
 </div>
 </div>
 </header>
 
-<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4">
-<div class="text-sm text-slate-600 font-medium">Sincronização entre Dispositivos:</div>
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-stone-200 flex flex-wrap justify-between items-center gap-4">
+<div class="text-sm text-stone-600 font-medium">Sincronização entre Dispositivos:</div>
 <div class="flex gap-3">
-<button onclick="exportData()" class="bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-xl text-sm font-semibold transition duration-200">Exportar Backup</button>
-<label class="bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-xl text-sm font-semibold transition duration-200 cursor-pointer">
+<button onclick="exportData()" class="bg-stone-100 text-stone-700 hover:bg-stone-200 px-4 py-2 rounded-xl text-sm font-semibold transition duration-200">Exportar Backup</button>
+<label class="bg-stone-100 text-stone-700 hover:bg-stone-200 px-4 py-2 rounded-xl text-sm font-semibold transition duration-200 cursor-pointer">
 Importar Backup
 <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
 </label>
 </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-1 h-fit">
-<h2 class="text-lg font-semibold text-slate-900 mb-4">Adicionar Despesa</h2>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 lg:col-span-1 h-fit">
+<h2 class="text-lg font-semibold text-stone-900 mb-4">Adicionar Despesa</h2>
 <form id="expenseForm" class="space-y-4">
 <div>
-<label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Data</label>
-<input type="date" id="expenseDate" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Data</label>
+<input type="date" id="expenseDate" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
 </div>
 <div>
-<label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Dia do Interrail</label>
-<input type="number" id="expenseDay" min="1" placeholder="Ex: 1" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Dia do Interrail</label>
+<input type="number" id="expenseDay" min="1" placeholder="Ex: 1" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
 </div>
 <div>
-<label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Tipo</label>
-<input type="text" id="expenseType" placeholder="Ex: Reservas, Dormidas, Refeições" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Tipo</label>
+<input type="text" id="expenseType" placeholder="Ex: Comboio, Dormida, Cerveja" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
 </div>
 <div>
-<label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Descrição</label>
-<input type="text" id="expenseDescription" placeholder="Ex: Reserva de TGV" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Descrição</label>
+<input type="text" id="expenseDescription" placeholder="Ex: Bilhete Paris-Berlim" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
 </div>
 <div>
-<label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Total (€)</label>
-<input type="number" step="0.01" id="expenseTotal" placeholder="0.00" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+<label class="block text-xs font-semibold text-stone-500 uppercase mb-1">Total (€)</label>
+<input type="number" step="0.01" id="expenseTotal" placeholder="0.00" required class="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-sm bg-stone-50/50">
 </div>
-<button type="submit" class="w-full bg-indigo-600 text-white font-semibold p-2.5 rounded-xl hover:bg-indigo-700 transition duration-200 text-sm">Registar Custo</button>
+<button type="submit" class="w-full bg-amber-700 text-white font-semibold p-2.5 rounded-xl hover:bg-amber-800 transition duration-200 text-sm shadow-sm">Registar Custo</button>
 </form>
 </div>
 
-<div class="space-y-8 md:col-span-2">
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-<h2 class="text-lg font-semibold text-slate-900 mb-4">Estatísticas por Tipo</h2>
-<div class="relative h-64 flex justify-center items-center">
-<canvas id="expenseChart"></canvas>
+<div class="space-y-8 lg:col-span-2">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+<h2 class="text-sm font-bold text-stone-700 uppercase tracking-wider mb-4">Gastos por Categoria</h2>
+<div class="relative h-56 flex justify-center items-center">
+<canvas id="categoryChart"></canvas>
+</div>
+</div>
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+<h2 class="text-sm font-bold text-stone-700 uppercase tracking-wider mb-4">Evolução por Dia</h2>
+<div class="relative h-56 flex justify-center items-center">
+<canvas id="dailyChart"></canvas>
+</div>
 </div>
 </div>
 
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-<h2 class="text-lg font-semibold text-slate-900 mb-4">Histórico de Despesas</h2>
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-lg font-semibold text-stone-900">Histórico de Despesas</h2>
+<span id="transactionCount" class="text-xs font-semibold text-stone-400 bg-stone-100 px-2.5 py-1 rounded-full">0 registos</span>
+</div>
 <div class="overflow-x-auto">
 <table class="w-full text-left text-sm">
-<thead class="bg-slate-50 border-b border-slate-200 text-slate-400 uppercase text-xs">
+<thead class="bg-stone-50 border-b border-stone-200 text-stone-400 uppercase text-xs">
 <tr>
-<th class="p-3 cursor-pointer hover:text-slate-600 select-none" onclick="sortTable('date')">Data / Dia ↕</th>
-<th class="p-3 cursor-pointer hover:text-slate-600 select-none" onclick="sortTable('type')">Tipo ↕</th>
-<th class="p-3 cursor-pointer hover:text-slate-600 select-none" onclick="sortTable('description')">Descrição ↕</th>
-<th class="p-3 cursor-pointer hover:text-slate-600 select-none" onclick="sortTable('total')">Total ↕</th>
+<th class="p-3 cursor-pointer hover:text-stone-600 select-none" onclick="sortTable('date')">Data / Dia ↕</th>
+<th class="p-3 cursor-pointer hover:text-stone-600 select-none" onclick="sortTable('type')">Tipo ↕</th>
+<th class="p-3 cursor-pointer hover:text-stone-600 select-none" onclick="sortTable('description')">Descrição ↕</th>
+<th class="p-3 cursor-pointer hover:text-stone-600 select-none" onclick="sortTable('total')">Total ↕</th>
 <th class="p-3">Metade</th>
 <th class="p-3 text-right">Ações</th>
 </tr>
 </thead>
-<tbody id="expenseTableBody" class="divide-y divide-slate-100">
+<tbody id="expenseTableBody" class="divide-y divide-stone-100">
 </tbody>
 </table>
 </div>
@@ -100,7 +117,8 @@ Importar Backup
 
 <script>
 let expenses = JSON.parse(localStorage.getItem('interrail_expenses')) || [];
-let expenseChartInstance = null;
+let categoryChartInstance = null;
+let dailyChartInstance = null;
 let currentSortColumn = 'date';
 let currentSortDirection = 'asc';
 
@@ -108,6 +126,9 @@ const expenseForm = document.getElementById('expenseForm');
 const expenseTableBody = document.getElementById('expenseTableBody');
 const totalSpentEl = document.getElementById('totalSpent');
 const perPersonEl = document.getElementById('perPerson');
+const dailyAverageEl = document.getElementById('dailyAverage');
+const peakDayEl = document.getElementById('peakDay');
+const transactionCountEl = document.getElementById('transactionCount');
 
 function saveData() {
 localStorage.setItem('interrail_expenses', JSON.stringify(expenses));
@@ -126,6 +147,7 @@ renderApp();
 function renderApp() {
 expenseTableBody.innerHTML = '';
 let totalSum = 0;
+const dailyTotals = {};
 
 expenses.sort((a, b) => {
 let valA = a[currentSortColumn];
@@ -148,24 +170,36 @@ return 0;
 });
 
 expenses.forEach((expense, index) => {
-totalSum += parseFloat(expense.total);
-const half = (expense.total / 2).toFixed(2);
+const amount = parseFloat(expense.total);
+totalSum += amount;
+
+const dayKey = `Dia ${expense.day} (${expense.date})`;
+dailyTotals[dayKey] = (dailyTotals[dayKey] || 0) + amount;
+
+const half = (amount / 2).toFixed(2);
 const row = document.createElement('tr');
 row.innerHTML = `
-<td class="p-3"><div class="font-semibold text-slate-900">${expense.date}</div><div class="text-xs text-slate-400">Dia ${expense.day}</div></td>
-<td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">${expense.type}</span></td>
-<td class="p-3 text-slate-600">${expense.description}</td>
-<td class="p-3 font-semibold text-slate-900">${parseFloat(expense.total).toFixed(2)} €</td>
-<td class="p-3 text-indigo-600 font-semibold">${half} €</td>
+<td class="p-3"><div class="font-semibold text-stone-900">${expense.date}</div><div class="text-xs text-stone-400">Dia ${expense.day}</div></td>
+<td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-stone-100 text-stone-700">${expense.type}</span></td>
+<td class="p-3 text-stone-600">${expense.description}</td>
+<td class="p-3 font-semibold text-stone-900">${amount.toFixed(2)} €</td>
+<td class="p-3 text-amber-700 font-semibold">${half} €</td>
 <td class="p-3 text-right"><button onclick="deleteExpense(${index})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold">Apagar</button></td>
 `;
 expenseTableBody.appendChild(row);
 });
 
+const uniqueDays = Object.keys(dailyTotals).length;
+const dailyAvg = uniqueDays > 0 ? totalSum / uniqueDays : 0;
+const peakVal = uniqueDays > 0 ? Math.max(...Object.values(dailyTotals)) : 0;
+
 totalSpentEl.textContent = `${totalSum.toFixed(2)} €`;
 perPersonEl.textContent = `${(totalSum / 2).toFixed(2)} €`;
+dailyAverageEl.textContent = `${dailyAvg.toFixed(2)} €`;
+peakDayEl.textContent = `${peakVal.toFixed(2)} €`;
+transactionCountEl.textContent = `${expenses.length} registos`;
 
-updateChart();
+updateCharts();
 }
 
 function deleteExpense(index) {
@@ -206,28 +240,32 @@ alert("Erro ao ler o ficheiro.");
 }
 }
 
-function updateChart() {
+function updateCharts() {
 const categories = {};
+const dailyTimeline = {};
+
 expenses.forEach(exp => {
 categories[exp.type] = (categories[exp.type] || 0) + parseFloat(exp.total);
+const dayLabel = `Dia ${exp.day}`;
+dailyTimeline[dayLabel] = (dailyTimeline[dayLabel] || 0) + parseFloat(exp.total);
 });
 
 const sortedCategories = Object.entries(categories).sort((a, b) => b[1] - a[1]);
-const labels = sortedCategories.map(item => item[0]);
-const data = sortedCategories.map(item => item[1]);
+const catLabels = sortedCategories.map(item => item[0]);
+const catData = sortedCategories.map(item => item[1]);
 
-const ctx = document.getElementById('expenseChart').getContext('2d');
-if (expenseChartInstance) {
-expenseChartInstance.destroy();
+const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+if (categoryChartInstance) {
+categoryChartInstance.destroy();
 }
 
-expenseChartInstance = new Chart(ctx, {
+categoryChartInstance = new Chart(ctxCategory, {
 type: 'doughnut',
 data: {
-labels: labels,
+labels: catLabels,
 datasets: [{
-data: data,
-backgroundColor: ['#4f46e5', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
+data: catData,
+backgroundColor: ['#b45309', '#d97706', '#f59e0b', '#78716c', '#57534e', '#292524', '#e11d48', '#0284c7'],
 borderWidth: 0
 }]
 },
@@ -236,8 +274,44 @@ responsive: true,
 maintainAspectRatio: false,
 plugins: {
 legend: {
-position: 'bottom'
+position: 'bottom',
+labels: { boxWidth: 12, font: { size: 11 } }
 }
+}
+}
+});
+
+const sortedDays = Object.entries(dailyTimeline).sort((a, b) => {
+return parseInt(a[0].replace('Dia ', '')) - parseInt(b[0].replace('Dia ', ''));
+});
+const dayLabels = sortedDays.map(item => item[0]);
+const dayData = sortedDays.map(item => item[1]);
+
+const ctxDaily = document.getElementById('dailyChart').getContext('2d');
+if (dailyChartInstance) {
+dailyChartInstance.destroy();
+}
+
+dailyChartInstance = new Chart(ctxDaily, {
+type: 'bar',
+data: {
+labels: dayLabels,
+datasets: [{
+label: 'Gasto Diário (€)',
+data: dayData,
+backgroundColor: '#b45309',
+borderRadius: 6
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+legend: { display: false }
+},
+scales: {
+y: { beginAtZero: true, grid: { color: '#f5f5f4' } },
+x: { grid: { display: false } }
 }
 }
 });
