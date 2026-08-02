@@ -19,10 +19,24 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: #f5f5f4; }
   ::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
-  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; }
-  .info-pill { background: #f5f5f4; border: 1px solid #e7e5e4; border-radius: 0.5rem; padding: 0.45rem 0.65rem; }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.4rem; }
+  .info-pill { background: #f5f5f4; border: 1px solid #e7e5e4; border-radius: 0.5rem; padding: 0.4rem 0.55rem; }
   .info-pill .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: #a8a29e; font-weight: 700; }
-  .info-pill .value { font-size: 13px; font-weight: 600; color: #1c1917; margin-top: 2px; line-height: 1.25; }
+  .info-pill .value { font-size: 12.5px; font-weight: 600; color: #1c1917; margin-top: 1px; line-height: 1.25; }
+
+  /* Timeline */
+  .day-timeline { scrollbar-width: none; }
+  .day-timeline::-webkit-scrollbar { display: none; }
+  .day-pill { min-width: 52px; }
+  .day-pill.active { background: #b45309; color: white; border-color: #b45309; }
+
+  /* Mobile refinements */
+  @media (max-width: 767px) {
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .entry-card:hover { transform: none; box-shadow: none; }
+    header .text-xl { font-size: 1.1rem; }
+    #hdrTotal, #hdrPerPerson, #hdrDays, #hdrCountries { font-size: 0.8rem; }
+  }
 </style>
 </head>
 <body class="text-stone-800 min-h-screen">
@@ -34,24 +48,24 @@
       <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-stone-900">
         InterRail <span class="text-amber-700 font-bold">//</span> Centro de Comando
       </h1>
-      <p class="text-xs text-stone-500 mt-0.5 font-medium">Gestão impiedosa de viagens, amizades e carteiras · v2.2</p>
+      <p class="text-xs text-stone-500 mt-0.5 font-medium">Gestão impiedosa de despesas e amizades.</p>
     </div>
-    <div class="flex flex-wrap gap-2 text-center">
-      <div class="bg-stone-50 border border-stone-200/80 rounded-xl px-3.5 py-2 min-w-[95px] shadow-sm">
-        <div class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Total</div>
-        <div id="hdrTotal" class="font-extrabold text-stone-900 text-sm cost-badge">0.00 €</div>
+    <div class="flex flex-wrap gap-1.5 sm:gap-2 text-center">
+      <div class="bg-stone-50 border border-stone-200/80 rounded-xl px-2.5 sm:px-3.5 py-1.5 sm:py-2 min-w-[72px] sm:min-w-[95px] shadow-sm">
+        <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-stone-400 font-bold">Total</div>
+        <div id="hdrTotal" class="font-extrabold text-stone-900 text-xs sm:text-sm cost-badge">0.00 €</div>
       </div>
-      <div class="bg-amber-50 border border-amber-200/60 rounded-xl px-3.5 py-2 min-w-[95px] shadow-sm">
-        <div class="text-[10px] uppercase tracking-wider text-amber-600/80 font-bold">Por Pessoa</div>
-        <div id="hdrPerPerson" class="font-extrabold text-amber-800 text-sm cost-badge">0.00 €</div>
+      <div class="bg-amber-50 border border-amber-200/60 rounded-xl px-2.5 sm:px-3.5 py-1.5 sm:py-2 min-w-[72px] sm:min-w-[95px] shadow-sm">
+        <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-amber-600/80 font-bold">Por Pessoa</div>
+        <div id="hdrPerPerson" class="font-extrabold text-amber-800 text-xs sm:text-sm cost-badge">0.00 €</div>
       </div>
-      <div class="bg-stone-50 border border-stone-200/80 rounded-xl px-3.5 py-2 min-w-[80px] shadow-sm">
-        <div class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Dias</div>
-        <div id="hdrDays" class="font-extrabold text-stone-900 text-sm">0</div>
+      <div class="bg-stone-50 border border-stone-200/80 rounded-xl px-2.5 sm:px-3.5 py-1.5 sm:py-2 min-w-[52px] sm:min-w-[80px] shadow-sm">
+        <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-stone-400 font-bold">Dias</div>
+        <div id="hdrDays" class="font-extrabold text-stone-900 text-xs sm:text-sm">0</div>
       </div>
-      <div class="bg-stone-50 border border-stone-200/80 rounded-xl px-3.5 py-2 min-w-[80px] shadow-sm">
-        <div class="text-[10px] uppercase tracking-wider text-stone-400 font-bold">Países</div>
-        <div id="hdrCountries" class="font-extrabold text-stone-900 text-sm">0</div>
+      <div class="bg-stone-50 border border-stone-200/80 rounded-xl px-2.5 sm:px-3.5 py-1.5 sm:py-2 min-w-[52px] sm:min-w-[80px] shadow-sm">
+        <div class="text-[9px] sm:text-[10px] uppercase tracking-wider text-stone-400 font-bold">Países</div>
+        <div id="hdrCountries" class="font-extrabold text-stone-900 text-xs sm:text-sm">0</div>
       </div>
     </div>
   </div>
@@ -64,7 +78,7 @@
   </nav>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 sm:px-6 py-7 space-y-7">
+<main class="max-w-7xl mx-auto px-3 sm:px-6 py-5 sm:py-7 space-y-5 sm:space-y-7">
 
   <!-- ==================== DASHBOARD ==================== -->
   <section id="view-dashboard" class="space-y-6">
@@ -133,15 +147,30 @@
   </section>
 
   <!-- ==================== ITINERÁRIO ==================== -->
-  <section id="view-itinerary" class="hidden space-y-5">
+  <section id="view-itinerary" class="hidden space-y-4">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
       <div>
         <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Itinerário da Viagem</h2>
-        <p class="text-sm text-stone-500 mt-0.5">Cada dia é um capítulo. Preenche tudo ou a aplicação fica ofendida.</p>
+        <p class="text-sm text-stone-500 mt-0.5 hidden sm:block">Cada dia é um capítulo. Preenche tudo ou a aplicação fica ofendida.</p>
       </div>
-      <button onclick="openDayModal()" class="bg-amber-700 hover:bg-amber-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition shadow-sm shadow-amber-700/20">+ Novo Dia</button>
+      <button onclick="openDayModal()" class="bg-amber-700 hover:bg-amber-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition shadow-sm shadow-amber-700/20 w-full sm:w-auto">+ Novo Dia</button>
     </div>
-    <div id="daysList" class="space-y-5"></div>
+
+    <div class="flex gap-3 sm:gap-4 items-start">
+      <!-- Mobile only: vertical timeline (sticky) -->
+      <aside id="dayTimelineMobile" class="block lg:hidden w-14 shrink-0 sticky self-start z-20" style="top: var(--sticky-top, 9.5rem)">
+        <div class="flex flex-col gap-1.5 max-h-[60vh] overflow-y-auto day-timeline pr-0.5" id="dayPillsMobile"></div>
+      </aside>
+
+      <div class="flex-1 min-w-0 space-y-4">
+        <!-- Desktop only: horizontal timeline (sticky) -->
+        <div id="daySelectorDesktop" class="hidden lg:block sticky z-30 py-2 bg-stone-100/95 backdrop-blur-sm rounded-xl px-1 border border-stone-200/40" style="top: var(--sticky-top, 8.5rem)">
+          <div class="day-timeline flex gap-2 overflow-x-auto" id="dayPillsDesktop"></div>
+        </div>
+
+        <div id="daysList" class="space-y-4"></div>
+      </div>
+    </div>
   </section>
 
   <!-- ==================== VIAJANTES ==================== -->
@@ -625,72 +654,133 @@ function updateCharts(entries, daysWithCost) {
 }
 
 // ==================== DAYS ====================
+function renderDayPills(sorted) {
+  const mobileEl = document.getElementById('dayPillsMobile');
+  const desktopEl = document.getElementById('dayPillsDesktop');
+  const desktopWrap = document.getElementById('daySelectorDesktop');
+
+  if (sorted.length === 0) {
+    if (mobileEl) mobileEl.innerHTML = '';
+    if (desktopEl) desktopEl.innerHTML = '';
+    if (desktopWrap) desktopWrap.classList.add('hidden');
+    return;
+  }
+
+  // Mobile = vertical pills
+  if (mobileEl) {
+    mobileEl.innerHTML = sorted.map(day => `
+      <button onclick="scrollToDay('${day.id}')" 
+        class="day-pill w-full flex flex-col items-center justify-center py-2 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold shadow-sm hover:border-amber-600 hover:text-amber-800 transition active:scale-95"
+        data-day-id="${day.id}">
+        <span class="text-[9px] text-stone-400 font-semibold leading-none">Dia</span>
+        <span class="text-sm font-extrabold leading-tight">${day.number}</span>
+      </button>`).join('');
+  }
+
+  // Desktop = horizontal pills (visibility controlled by lg:block CSS)
+  if (desktopEl && desktopWrap) {
+    desktopWrap.className = 'hidden lg:block sticky z-30 py-2 bg-stone-100/95 backdrop-blur-sm rounded-xl px-1 border border-stone-200/40';
+    desktopWrap.style.top = 'var(--sticky-top, 8.5rem)';
+    desktopEl.innerHTML = sorted.map(day => `
+      <button onclick="scrollToDay('${day.id}')" 
+        class="day-pill flex flex-col items-center justify-center px-3.5 py-2 rounded-xl border border-stone-200 bg-white text-stone-700 text-xs font-bold shadow-sm hover:border-amber-600 hover:text-amber-800 transition"
+        data-day-id="${day.id}">
+        <span class="text-[10px] text-stone-400 font-semibold leading-none">Dia</span>
+        <span class="text-base font-extrabold leading-tight">${day.number}</span>
+      </button>`).join('');
+  }
+}
+
+function scrollToDay(dayId) {
+  const el = document.getElementById('day-block-' + dayId);
+  if (el) {
+    const header = document.querySelector('header');
+    const headerH = header ? header.getBoundingClientRect().height : 120;
+    // header + timeline bar (~52px) + small gap
+    const timelineExtra = window.innerWidth >= 1024 ? 56 : 8;
+    const offset = headerH + timelineExtra + 12;
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }
+}
+
 function renderDays() {
   const list = document.getElementById('daysList');
   if (data.days.length === 0) {
-    list.innerHTML = `<div class="bg-white rounded-2xl border border-stone-200/80 p-12 text-center shadow-sm">
+    list.innerHTML = `<div class="bg-white rounded-2xl border border-stone-200/80 p-10 text-center shadow-sm">
       <p class="text-stone-500 text-sm">Ainda não há dias. Adiciona o Dia 1 e começa a escrita desta epopeia.</p>
     </div>`;
+    renderDayPills([]);
     return;
   }
 
   const sorted = [...data.days].sort((a, b) => a.number - b.number);
+  renderDayPills(sorted);
+
   list.innerHTML = sorted.map(day => {
     const dayTotal = (day.entries || []).reduce((s, e) => s + (parseFloat(e.cost) || 0), 0);
     const entriesHtml = (day.entries || []).length === 0
-      ? '<p class="text-sm text-stone-400 py-3">Nenhuma entrada neste dia. Que vazio existencial.</p>'
+      ? '<p class="text-sm text-stone-400 py-2 px-1">Nenhuma entrada neste dia.</p>'
       : (day.entries || []).map(e => renderEntryCard(day.id, e)).join('');
 
     return `
-      <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
-        <div class="day-header p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-stone-100">
-          <div>
-            <div class="flex items-center gap-2.5 flex-wrap">
-              <span class="bg-amber-700 text-white text-xs font-extrabold px-2.5 py-1 rounded-lg tracking-wide">Dia ${day.number}</span>
-              <span class="text-sm font-medium text-stone-500">${day.date || ''}</span>
-              ${day.country ? `<span class="text-xs font-bold bg-stone-200/80 text-stone-700 px-2 py-0.5 rounded-md">${day.country}</span>` : ''}
+      <div id="day-block-${day.id}" class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden scroll-mt-48 lg:scroll-mt-52">
+        <div class="day-header p-3.5 sm:p-5 flex flex-col gap-3 border-b border-stone-100">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="bg-amber-700 text-white text-xs font-extrabold px-2.5 py-1 rounded-lg tracking-wide">Dia ${day.number}</span>
+                <span class="text-sm font-medium text-stone-500">${day.date || ''}</span>
+                ${day.country ? `<span class="text-xs font-bold bg-stone-200/80 text-stone-700 px-2 py-0.5 rounded-md">${day.country}</span>` : ''}
+              </div>
+              ${day.title ? `<div class="font-bold text-stone-900 mt-1.5 text-[15px] leading-snug">${day.title}</div>` : ''}
+              ${day.notes ? `<div class="text-sm text-stone-500 mt-1 leading-snug">${day.notes}</div>` : ''}
             </div>
-            ${day.title ? `<div class="font-bold text-stone-900 mt-1.5 text-base">${day.title}</div>` : ''}
-            ${day.notes ? `<div class="text-sm text-stone-500 mt-1">${day.notes}</div>` : ''}
+            <div class="text-right shrink-0">
+              <div class="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Total</div>
+              <div class="font-extrabold text-stone-900 cost-badge text-sm sm:text-base">${formatMoney(dayTotal)}</div>
+              <div class="text-[11px] sm:text-xs text-amber-700 font-bold cost-badge">${halfMoney(dayTotal)}</div>
+            </div>
           </div>
-          <div class="flex items-center gap-3 flex-wrap">
-            <div class="text-right">
-              <div class="text-[10px] uppercase text-stone-400 font-bold tracking-wider">Total do dia</div>
-              <div class="font-extrabold text-stone-900 cost-badge">${formatMoney(dayTotal)}</div>
-              <div class="text-xs text-amber-700 font-bold cost-badge">${halfMoney(dayTotal)} / pessoa</div>
-            </div>
-            <button onclick="openEntryModal('${day.id}')" class="bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition">+ Entrada</button>
-            <button onclick="editDay('${day.id}')" class="text-xs text-stone-500 hover:text-amber-700 font-bold">Editar</button>
-            <button onclick="deleteDay('${day.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold">Apagar</button>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openEntryModal('${day.id}')" class="bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition flex-1 sm:flex-none text-center">+ Entrada</button>
+            <button onclick="editDay('${day.id}')" class="text-xs text-stone-500 hover:text-amber-700 font-bold px-2 py-2">Editar</button>
+            <button onclick="deleteDay('${day.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold px-2 py-2">Apagar</button>
           </div>
         </div>
-        <div class="p-4 sm:p-5 space-y-3">${entriesHtml}</div>
+        <div class="p-3 sm:p-5 space-y-2.5">${entriesHtml}</div>
       </div>`;
   }).join('');
 }
 
 function renderEntryCard(dayId, e) {
   return `
-    <div class="entry-card bg-stone-50/80 border border-stone-100 rounded-xl p-4">
-      <div class="flex justify-between items-start gap-4">
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider ${typeColor(e.type)} px-2 py-0.5 rounded-md">${typeLabel(e.type)}</span>
-            <span class="font-bold text-stone-900 text-[15px]">${e.title}</span>
-            ${e.country ? `<span class="text-[10px] font-bold bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">${e.country}</span>` : ''}
-          </div>
-          ${e.description ? `<div class="text-sm text-stone-600 mb-2">${e.description}</div>` : ''}
-          ${renderEntryDetails(e)}
+    <div class="entry-card bg-stone-50/80 border border-stone-100 rounded-xl p-3 sm:p-4">
+      <!-- Linha 1: badges + Editar/Apagar -->
+      <div class="flex items-center justify-between gap-2 mb-1.5">
+        <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider ${typeColor(e.type)} px-1.5 py-0.5 rounded">${typeLabel(e.type)}</span>
+          ${e.country ? `<span class="text-[10px] font-bold bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">${e.country}</span>` : ''}
         </div>
-        <div class="text-right shrink-0">
-          <div class="font-extrabold text-stone-900 text-base cost-badge">${formatMoney(e.cost)}</div>
-          <div class="text-sm text-amber-700 font-bold cost-badge mt-0.5">${halfMoney(e.cost)}</div>
-          <div class="flex gap-2.5 mt-2.5 justify-end">
-            <button onclick="editEntry('${dayId}','${e.id}')" class="text-xs text-stone-500 hover:text-amber-700 font-bold">Editar</button>
-            <button onclick="deleteEntry('${dayId}','${e.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold">Apagar</button>
-          </div>
+        <div class="flex items-center gap-2.5 shrink-0">
+          <button onclick="editEntry('${dayId}','${e.id}')" class="text-[11px] text-stone-500 hover:text-amber-700 font-bold">Editar</button>
+          <button onclick="deleteEntry('${dayId}','${e.id}')" class="text-[11px] text-rose-500 hover:text-rose-700 font-bold">Apagar</button>
         </div>
       </div>
+
+      <!-- Linha 2: título + preços lado a lado -->
+      <div class="flex justify-between items-start gap-3">
+        <div class="min-w-0 flex-1">
+          <div class="font-bold text-stone-900 text-sm sm:text-[15px] leading-snug">${e.title}</div>
+          ${e.description ? `<div class="text-xs sm:text-sm text-stone-600 mt-0.5 leading-snug">${e.description}</div>` : ''}
+        </div>
+        <div class="flex items-baseline gap-2 shrink-0 text-right">
+          <span class="font-extrabold text-stone-900 text-sm sm:text-base cost-badge">${formatMoney(e.cost)}</span>
+          <span class="text-[11px] sm:text-sm text-amber-700 font-bold cost-badge">${halfMoney(e.cost)}</span>
+        </div>
+      </div>
+
+      ${renderEntryDetails(e)}
     </div>`;
 }
 
@@ -1068,5 +1158,47 @@ renderDashboard();
 renderDays();
 renderTravelers();
 </script>
+
+<!-- Back to top -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" 
+  class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center justify-center w-11 h-11 rounded-full bg-stone-900/90 text-white shadow-lg hover:bg-stone-800 transition backdrop-blur-sm border border-stone-700/50"
+  aria-label="Voltar ao topo" title="Voltar ao topo">
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+</button>
+
+<script>
+(function(){
+  const btn = document.getElementById('backToTop');
+  if (!btn) return;
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 380) {
+      btn.classList.remove('hidden');
+      btn.classList.add('flex');
+    } else {
+      btn.classList.add('hidden');
+      btn.classList.remove('flex');
+    }
+  }, { passive: true });
+})();
+</script>
+
+
+<script>
+(function(){
+  function updateStickyTop() {
+    const header = document.querySelector('header');
+    if (!header) return;
+    // + 8px breathing room so the bar sits cleanly below the header
+    const h = header.getBoundingClientRect().height + 8;
+    document.documentElement.style.setProperty('--sticky-top', h + 'px');
+  }
+  updateStickyTop();
+  window.addEventListener('resize', updateStickyTop);
+  // Recalc after fonts/layout settle
+  setTimeout(updateStickyTop, 100);
+  setTimeout(updateStickyTop, 400);
+})();
+</script>
+
 </body>
 </html>
